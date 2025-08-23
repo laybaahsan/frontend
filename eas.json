@@ -4,6 +4,10 @@
     "appVersionSource": "remote"
   },
   "build": {
+     "production": {
+      "android": {
+        "buildType": "app-bundle"   // Play Store (.aab)
+      },
     "development": {
       "developmentClient": true,
       "distribution": "internal"
