@@ -3,6 +3,9 @@ import { View, Text, TouchableOpacity, Alert, StyleSheet } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import * as Clipboard from "expo-clipboard";
 import * as Sharing from "expo-sharing";
+import apiConfig from '../config/app';
+import axios from 'axios';
+
 
 const MedicineDetail = ({ medicineName, onSave, saved }) => {
 

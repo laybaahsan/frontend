@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "2633e06e-2ee4-4218-87e4-3a8c4099c740"
+      }
+    },
+    "android": {
+      "package": "com.laybaahsan.medscan"
+    }
+  }
+}

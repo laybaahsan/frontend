@@ -1,0 +1,13 @@
+import axios from "axios";
+
+import apiConfig from "./MedScan/config/app";
+
+// Ye ek chhota helper "server" file hai jo API ko connect karegi
+const server = axios.create({
+  baseURL: apiConfig.API_BASE_URL, // yahan se sari requests chalengi
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
+export default server;
