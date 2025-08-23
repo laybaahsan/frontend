@@ -6,8 +6,10 @@
   "build": {
      "production": {
       "android": {
-        "buildType": "app-bundle"   // Play Store (.aab)
-      },
+        "buildType": "app-bundle"   
+     },
+      "autoIncrement": true
+    },
     "development": {
       "developmentClient": true,
       "distribution": "internal"
