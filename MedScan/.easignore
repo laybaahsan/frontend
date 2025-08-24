@@ -1,0 +1,41 @@
+
+# Ignore dependencies
+node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native keys and debug files
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+*.pem
+
+# Metro
+.metro-health-check*
+
+# Debug logs
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# macOS
+.DS_Store
+
+# Local env files
+.env*.local
+
+# TypeScript
+*.tsbuildinfo
+
+# Example / unused apps
+app-example
+
+# Important: Do NOT ignore assets needed for build
+#assets/
