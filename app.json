@@ -4,6 +4,7 @@
     "name": "MedScan",
     "slug": "medscan",
     "version": "1.0.0",
+     "scheme": "medscan",
     "icon": "./assets/icon.png",
     "splash": {
       "image": "./assets/splash.png",
@@ -18,7 +19,6 @@
     "android": {
       "package": "com.laybaahsan.medscan",
       "versionCode": 1,
-  "icon": "./assets/icon.png",
   "adaptiveIcon": {
     "foregroundImage": "./assets/icon.png",
     "backgroundColor": "#202967"
