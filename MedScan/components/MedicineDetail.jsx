@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, Alert, StyleSheet ,ActivityIndicator} from "react-native";
 import { Feather } from "@expo/vector-icons";
 import * as Clipboard from "expo-clipboard";
@@ -7,7 +7,7 @@ import axios from "axios";
 import server from "../config/server";
 
 
-const MedicineDetail = ({ medicineName, onSave, saved }) => {
+const MedicineDetail = ({ medicineName, onSave }) => {
    const [medicine, setMedicine] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saved, setSaved] = useState(false);

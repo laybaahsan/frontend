@@ -111,26 +111,26 @@ export default function SignUpScreen(){
         <Text style={styles.header}>CREATE MEDSCAN ACCOUNT</Text>
 
         <TextInput
-          style={[styles.input, firstNameError && styles.errorInput]}
+          style={[styles.input, FirstNameError && styles.errorInput]}
           placeholder="Enter First Name"
-          value={firstName}
+          value={FirstName}
           onChangeText={(text) => {
             setFirstName(text);
             if (text) setFirstNameError('');
           }}
         />
-        {firstNameError ? <Text style={styles.errorText}>{firstNameError}</Text> : null}
+        {FirstNameError ? <Text style={styles.errorText}>{FirstNameError}</Text> : null}
 
         <TextInput
-          style={[styles.input, lastNameError && styles.errorInput]}
+          style={[styles.input, LastNameError && styles.errorInput]}
           placeholder="Enter Last Name"
-          value={lastName}
+          value={LastName}
           onChangeText={(text) => {
             setLastName(text);
             if (text) setLastNameError('');
           }}
         />
-        {lastNameError ? <Text style={styles.errorText}>{lastNameError}</Text> : null}
+        {LastNameError ? <Text style={styles.errorText}>{LastNameError}</Text> : null}
 
         <TextInput
           style={[styles.input, emailError && styles.errorInput]}
@@ -160,9 +160,11 @@ export default function SignUpScreen(){
         {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
 
         <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.button} onPress={handleSignUp}>
-            <Text style={styles.buttonText}>Sign Up</Text>
-          </TouchableOpacity>
+           <TouchableOpacity style={styles.button} onPress={handleSignUp}>
+  <Text style={styles.buttonText}>Sign Up</Text>
+</TouchableOpacity>
+
+
           <TouchableOpacity style={styles.button} onPress={handleSkip}>
             <Text style={styles.buttonText}>Skip</Text>
           </TouchableOpacity>

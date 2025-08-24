@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+
 import { View, Text, Image, TouchableOpacity, StyleSheet, Modal, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
@@ -100,7 +101,8 @@ const styles = StyleSheet.create({
   closeText: { fontSize: 16, color: '#000' },
   header: { fontSize: 20, color: '#000', fontWeight: 'bold', marginBottom: 20, alignSelf: 'center' },
   profileIcon: { width: 80, height: 80, alignSelf: 'center', marginBottom: 20 },
-  optionsContainer: { flexDirection: 'colum', justifyContent: 'space-between' },
+  optionsContainer: { flexDirection: 'column', justifyContent: 'space-between' },
+
   option: { padding: 10 },
   optionText: { fontSize: 16, color: '#000' },
 });
