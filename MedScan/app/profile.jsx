@@ -1,49 +1,66 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, Image, StyleSheet, TextInput, TouchableOpacity, Alert } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as ImagePicker from "expo-image-picker";
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, ActivityIndicator } from "react-native";
+import axios from "axios";
+import server from "../config/server"; // your backend URL
 
 export default function ProfileScreen() {
-  const [user, setUser] = useState({ name: "", email: "", profileImage: "" });
+const [user, setUser] = useState({ FirstName: "", LastName: "", email: "" });
+const [loading, setLoading] = useState(false);
 
+  // Fetch user profile from backend
   useEffect(() => {
-    const loadUser = async () => {
-      const stored = await AsyncStorage.getItem("user");
-      if (stored) setUser(JSON.parse(stored));
+    const fetchProfile = async () => {
+      try {
+        setLoading(true);
+        const res = await axios.get(`${server}/profile` , {withCredentials:true});
+        setUser(res.data);
+      } catch (err) {
+        console.log(err);
+        Alert.alert("Error", "Failed to fetch profile.");
+      } finally {
+        setLoading(false);
+      }
     };
-    loadUser();
+    fetchProfile();
   }, []);
 
-  const pickImage = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      quality: 1,
-    });
-    if (!result.canceled) return;
-    setUser({ ...user, profileImage: result.assets[0].uri });
+  // Save updated profile to backend
+  const saveProfile = async () => {
+    try {
+      const res = await axios.put(`${server}/profile`, user);
+      setUser(res.data);
+      Alert.alert("Success", "Profile updated.");
+    } catch (err) {
+      console.log(err);
+      Alert.alert("Error", "Failed to update profile.");
+    }
   };
 
-  const saveProfile = async () => {
-    await AsyncStorage.setItem("user", JSON.stringify(user));
-    Alert.alert("Success", "Profile updated.");
-  };
+  if (loading) {
+    return <ActivityIndicator size="large" color="#003087" style={{ flex: 1, justifyContent: "center" }} />;
+  }
+
+  // Get first letter of name for avatar
+  const avatarLetter = user.FirstName ? user.FirstName[0].toUpperCase() : "U";
 
   return (
     <View style={styles.container}>
-      {user.profileImage ? (
-        <Image source={{ uri: user.profileImage }} style={styles.avatar} />
-      ) : null}
-      <TouchableOpacity onPress={pickImage} style={styles.button}>
-        <Text style={styles.buttonText}>Change Profile Image</Text>
-      </TouchableOpacity>
+      <View style={styles.avatarPlaceholder}>
+        <Text style={styles.avatarText}>{avatarLetter}</Text>
+      </View>
 
       <TextInput
         style={styles.input}
-        placeholder="Name"
-        value={user.name}
-        onChangeText={(text) => setUser({ ...user, name: text })}
+        placeholder="First Name"
+        value={user.FirstName}
+        onChangeText={(text) => setUser({ ...user, FirstName: text })}
       />
+      <TextInput
+  style={styles.input}
+  placeholder="Last Name"
+  value={user.LastName}
+  onChangeText={(text) => setUser({ ...user, LastName: text })}
+     />
       <TextInput
         style={styles.input}
         placeholder="Email"
@@ -60,7 +77,21 @@ export default function ProfileScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff", padding: 20 },
-  avatar: { width: 100, height: 100, borderRadius: 50, alignSelf: "center", marginBottom: 15 },
+  avatarPlaceholder: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: "#003087",
+    justifyContent: "center",
+    alignItems: "center",
+    alignSelf: "center",
+    marginBottom: 15,
+  },
+  avatarText: {
+    color: "#fff",
+    fontSize: 40,
+    fontWeight: "bold",
+  },
   input: {
     borderWidth: 1,
     borderColor: "#ccc",
@@ -68,14 +99,15 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 15,
   },
-  button: {
+  saveButton: {
     backgroundColor: "#003087",
-    padding: 10,
+    padding: 12,
     borderRadius: 8,
     alignItems: "center",
-    marginBottom: 15,
   },
-  buttonText: { color: "#fff", fontSize: 16 },
-  saveButton: { backgroundColor: "#003087", padding: 12, borderRadius: 8, alignItems: "center" },
-  saveText: { color: "#fff", fontSize: 16, fontWeight: "bold" },
+  saveText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
 });

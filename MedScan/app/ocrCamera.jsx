@@ -1,11 +1,14 @@
-import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
+import React, { useState, useRef } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from "react-native";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { useRouter } from "expo-router";
+import axios from "axios";
+import server from "../config/server";
 
 export default function OcrCamera() {
   const [permission, requestPermission] = useCameraPermissions();
   const [loading, setLoading] = useState(false);
+  const cameraRef = useRef(null);   // ref for capturing photo
   const router = useRouter();
 
   if (!permission) {
@@ -24,29 +27,41 @@ export default function OcrCamera() {
   }
 
   const handleCapture = async () => {
+    if (!cameraRef.current) return;
     setLoading(true);
 
-    // Simulate OCR with dummy data
-    setTimeout(() => {
+    try {
+      //  Take picture
+      const photo = await cameraRef.current.takePictureAsync({ base64: true });
+ if (!photo.base64) throw new Error("Failed to capture image");
+      // 🚀 Send image to backend
+      const response = await axios.post(`${server}/medicine/scan-ocr`, {
+        image: photo.base64,
+      });
+
       setLoading(false);
 
-      const dummyMedicine = {
-        name: "Panadol",
-        company: "GSK Pharma",
-        formula: "Paracetamol 500mg",
-        instructions: "Take 1 tablet every 6-8 hours after meals",
-      };
-
-      router.push({
-        pathname: "/medicine-detail",
-        params: { medicine: dummyMedicine },
-      });
-    }, 2000);
+      if (response.data && response.data.medicine) {
+        // 👉 Navigate to medicine detail with fetched data
+        router.push({
+          pathname: "/medicine-detail",
+          params: { name: response.data.medicine.name },
+        });
+      } else {
+        Alert.alert("Not Found", "No matching medicine found in database.");
+      }
+    } catch (error) {
+      setLoading(false);
+      console.error("OCR Scan Error:", error);
+      Alert.alert("Error", "Failed to scan medicine. Please try again.");
+    }
   };
 
   return (
     <View style={{ flex: 1 }}>
-      <CameraView style={{ flex: 1 }} />
+      {/* Attach ref to CameraView */}
+      <CameraView ref={cameraRef} style={{ flex: 1 }} />
+
       <View style={styles.footer}>
         {loading ? (
           <ActivityIndicator size="large" color="#fff" />

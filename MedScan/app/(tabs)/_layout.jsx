@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { Tabs } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import CustomDrawer from '../../components/CustomDrawer';
 
+
 export default function TabsLayout() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isSignedUp, setIsSignedUp] = useState(false);
+
 
   return (
     <>

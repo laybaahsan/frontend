@@ -1,16 +1,61 @@
 import React from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, Modal } from 'react-native';
+import { View, Text, Image, TouchableOpacity, StyleSheet, Modal, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
-import server from "../server";
+import axios from 'axios';
+import server from '../config/server';
 
-const CustomDrawer = ({ isOpen, onClose, isSignedUp, setIsSignedUp }) => {
+const CustomDrawer = ({ isOpen, onClose, setIsSignedUp }) => {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+   // Fetch user profile from backend
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        setLoading(true);
+        const storedUser = await AsyncStorage.getItem('user');
+        if (!storedUser) return;
+        const parsedUser = JSON.parse(storedUser);
+
+        const res = await axios.get(`${server}/user/profile`, {
+          headers: { Authorization: `Bearer ${parsedUser.token}` }, // if using JWT
+          withCredentials: true,
+        });
+         setUser(res.data);
+      } catch (err) {
+        console.error('Failed to fetch profile:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+      if (isOpen) fetchProfile(); // fetch only when drawer opens
+  }, [isOpen]);
+
+
   const handleLogout = async () => {
-    await AsyncStorage.removeItem('user');
-    setIsSignedUp(false);
-    onClose();
-    router.replace('/auth/signup');
+      try {
+      const storedUser = await AsyncStorage.getItem('user');
+      if (storedUser) {
+        const parsedUser = JSON.parse(storedUser);
+
+        // Optional: call backend to logout
+        await axios.post(`${server}/user/logout`, {}, {
+          headers: { Authorization: `Bearer ${parsedUser.token}` },
+          withCredentials: true,
+        });
+      }
+
+      await AsyncStorage.removeItem('user');
+      setIsSignedUp(false);
+      onClose();
+      router.replace('/auth/signup');
+    } catch (err) {
+      console.error('Logout failed:', err);
+      Alert.alert('Error', 'Logout failed. Try again.');
+    }
   };
+
 
   return (
     <Modal visible={isOpen} animationType="slide" transparent>
@@ -28,7 +73,7 @@ const CustomDrawer = ({ isOpen, onClose, isSignedUp, setIsSignedUp }) => {
             style={styles.option}
             onPress={() => {
               onClose();
-              router.push('/auth/signup');
+              router.push('/user/signup');
             }}
           >
             <Text style={styles.optionText}>Sign Up</Text>
@@ -55,7 +100,7 @@ const styles = StyleSheet.create({
   closeText: { fontSize: 16, color: '#000' },
   header: { fontSize: 20, color: '#000', fontWeight: 'bold', marginBottom: 20, alignSelf: 'center' },
   profileIcon: { width: 80, height: 80, alignSelf: 'center', marginBottom: 20 },
-  Container: { flexDirection: 'colum', justifyContent: 'space-between' },
+  optionsContainer: { flexDirection: 'colum', justifyContent: 'space-between' },
   option: { padding: 10 },
   optionText: { fontSize: 16, color: '#000' },
 });

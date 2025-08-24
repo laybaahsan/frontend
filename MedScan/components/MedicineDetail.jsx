@@ -1,44 +1,96 @@
 import React from "react";
-import { View, Text, TouchableOpacity, Alert, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, Alert, StyleSheet ,ActivityIndicator} from "react-native";
 import { Feather } from "@expo/vector-icons";
 import * as Clipboard from "expo-clipboard";
-import * as Sharing from "expo-sharing";
-import apiConfig from '../config/app';
-import axios from 'axios';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
+import server from "../config/server";
 
 
 const MedicineDetail = ({ medicineName, onSave, saved }) => {
+   const [medicine, setMedicine] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [saved, setSaved] = useState(false);
 
+
+  
+  // Fetch medicine from backend on mount
+  useEffect(() => {
+    if (!medicineName) return;
+
+    const fetchMedicine = async () => {
+      try {
+        setLoading(true);
+        const res = await axios.get(`${server}/medicine/${medicineName}`);
+        if (res.data) setMedicine(res.data);
+        else Alert.alert("Not Found", "Medicine not found in database.");
+      } catch (err) {
+        console.error("Error fetching medicine:", err);
+        Alert.alert("Error", "Failed to fetch medicine.");
+      } finally {
+        setLoading(false);
+      }
+    };
+ fetchMedicine();
+  }, [medicineName]);
+
+  // Save medicine to backend + local
+  const handleSavePress = async () => {
+    if (!medicine) return;
+
+    try {
+      const user = await AsyncStorage.getItem("user");
+      if (!user) {
+        Alert.alert("Sign Up Required", "Please sign up to save medicines.");
+        return;
+      }
+
+const parsedUser = JSON.parse(user);
+
+      // Save to backend history
+      await axios.post(`${server}/history/save`, {
+        userId: parsedUser._id,
+        medicine,
+      });
+
+      setSaved(true);
+      Alert.alert("Success", "Medicine saved to history.");
+    } catch (err) {
+      console.error("Error saving medicine:", err);
+      Alert.alert("Error", "Failed to save medicine.");
+    }
+  };
+
+   // Copy medicine details
   const handleCopy = async () => {
+    if (!medicine) return;
+
     await Clipboard.setStringAsync(
-      `${medicineName}\nCompany: Example Pharma\nFormula: Sample Formula`
+      `Name: ${medicine.name}
+Company: ${medicine.company}
+Formula: ${medicine.formula}
+Instructions: ${medicine.instructions}
+Side Effects: ${medicine.sideEffects}
+Manufacturing: ${medicine.manufacturingDetails}`
     );
+
     Alert.alert("Success", "Medicine details copied to clipboard!");
   };
+   if (loading) {
+    return (
+      <View style={styles.loader}>
+        <ActivityIndicator size="large" color="#003087" />
+      </View>
+    );
+  }
 
-  const handleShare = async () => {
-    if (await Sharing.isAvailableAsync()) {
-      await Sharing.shareAsync("", {
-        dialogTitle: "Share Medicine Details",
-        message: `${medicineName}\nCompany: Example Pharma\nFormula: Sample Formula`,
-      });
-    } else {
-      Alert.alert("Error", "Sharing is not available on this device.");
-    }
-  };
-
-  // ✅ Updated Save button to call onSave prop
-  const handleSavePress = () => {
-    if (onSave) {
-      const medicine = {
-        name: medicineName,
-        details: "Company: Example Pharma | Formula: Sample Formula",
-      };
-      onSave(medicine);
-    } else {
-      Alert.alert("Error", "Save function not available.");
-    }
-  };
+  if (!medicine) {
+    return (
+      <View style={styles.loader}>
+        <Text>Medicine data not available.</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -58,9 +110,7 @@ const MedicineDetail = ({ medicineName, onSave, saved }) => {
         <TouchableOpacity style={styles.iconButton} onPress={handleCopy}>
           <Feather name="copy" size={24} color="#fff" />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.iconButton} onPress={handleShare}>
-          <Feather name="share" size={24} color="#fff" />
-        </TouchableOpacity>
+        {/* 🚫 Share button removed */}
       </View>
     </View>
   );
